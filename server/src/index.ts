@@ -1,68 +1,42 @@
 import { WebSocketServer, WebSocket } from 'ws';
-import { Game, RegData, User, WSMessage } from './types';
-import { randomUUID } from "crypto";
+import { Game, User, WSMessage } from './types';
+import { handleAuth } from './handlers/auth';
+import { handleCreateGame } from './handlers/createGame';
+import { handleJoinGame } from './handlers/joinGame';
 
-const users = new Map<string, User>();
+export const users = new Map<string, User>();
+export const games = new Map<string, Game>();
+export const connections = new Map<WebSocket, User>();
 
 const PORT = process.env.PORT ? parseInt(process.env.PORT) : 3000;
 
 // WebSocket server
 const wss = new WebSocketServer({ port: PORT });
 
-
-// Register / Login
-const handleAuth = (ws: WebSocket, { name, password }: RegData) => {
-  let user = Array.from(users.values()).find((user) => user.name === name);
-  
-  if (user) {
-    if (user.password !== password) {
-      ws.send(JSON.stringify({
-        type: 'reg',
-        data: {
-          name: '',
-          index: '',
-          error: true,
-          errorText: 'Invalid password'
-        },
-        id: 0
-      }));
-      return;
-    }
-  }
-
-  user = {
-    name,
-    password,
-    index: randomUUID(),
-  };
-  
-  users.set(user.index, user);
-  console.log(users);
-
-  ws.send(JSON.stringify({
-    type: 'reg',
-    data: {
-      name: user.name,
-      index: user.index,
-      error: false,
-      errorText: ''
-    },
-    id: 0
-  }));
-}
-
-
 wss.on('connection', (ws: WebSocket) => {
   ws.on('message', (message: string) => {
     try {
       const parsedMessage: WSMessage = JSON.parse(message.toString());
       const { type, data } = parsedMessage;
-            
+      
+      const currentUser = connections.get(ws);
+      
       switch (type) {
         case 'reg':
           handleAuth(ws, data);
           break;
           
+        case 'create_game':
+          if (currentUser) {
+            handleCreateGame(ws, data, currentUser);
+          }
+          break;
+        case 'join_game':
+          if (currentUser) {
+            handleJoinGame(ws, data, currentUser);
+          }
+          break;
+
         default:
           ws.send(JSON.stringify({
             type: 'error',
