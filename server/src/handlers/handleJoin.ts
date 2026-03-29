@@ -1,8 +1,8 @@
 import { WebSocket } from 'ws';
-import { JoinGameData, Player, User } from "../types";
-import { sendMessage } from '../utils/sendMessage';
-import { updatePlayers } from '../services/updatePlayers';
-import { games } from '../store';
+import { JoinGameData, Player, User } from "../types.js";
+import { sendMessage } from '../utils/sendMessage.js';
+import { updatePlayers } from '../services/updatePlayers.js';
+import { games } from '../store.js';
 
 // validates code, adds player, broadcasts player_joined and update_players
 export const handleJoinGame = (ws: WebSocket, { code }: JoinGameData, user: User) => {

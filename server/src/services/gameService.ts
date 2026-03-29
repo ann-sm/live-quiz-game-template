@@ -1,9 +1,9 @@
 import { WebSocket } from 'ws';
-import { games } from "../store";
-import { Game, StartGameData, User } from "../types";
-import { sendMessage } from "../utils/sendMessage";
-import { calculateScore } from '../utils/calculateScore';
-import { updatePlayers } from './updatePlayers';
+import { games } from "../store.js";
+import { Game, StartGameData, User } from "../types.js";
+import { sendMessage } from "../utils/sendMessage.js";
+import { calculateScore } from '../utils/calculateScore.js';
+import { updatePlayers } from './updatePlayers.js';
 
 
 export const handleStartGame = (ws: WebSocket, { gameId }: StartGameData, user: User) => {
@@ -46,6 +46,14 @@ export const showQuestion = (game: Game) => {
   const question = game.questions[game.currentQuestion];
 
   game.questionStartTime = Date.now();
+
+  game.players.forEach(player => {
+    player.hasAnswered = false;
+    player.answerTime = undefined;
+    player.answeredCorrectly = undefined;
+  });
+
+  game.playerAnswers.clear();
   
   const questionData = {
     questionNumber: game.currentQuestion + 1,
@@ -72,6 +80,11 @@ export const showQuestion = (game: Game) => {
 
 
 export const validateResults = (game: Game) => {
+  if (game.questionTimer) {
+    clearTimeout(game.questionTimer);
+    game.questionTimer = undefined;
+  }
+
   const question = game.questions[game.currentQuestion];
   const timeLimit = question.timeLimitSec * 1000;
 
@@ -84,7 +97,7 @@ export const validateResults = (game: Game) => {
   
   game.players.forEach(player => {
     const answer = game.playerAnswers.get(player.index);
-    let points = 0;
+    let pointsEarned = 0;
     let answered = false;
     let correct = false;
 
@@ -95,8 +108,8 @@ export const validateResults = (game: Game) => {
       if (correct) {
         const timeRemaining = Math.max(0, timeLimitEnd - answer.timestamp);
         const timeRemainingSec = timeRemaining / 1000;
-        points = calculateScore(timeRemainingSec, question.timeLimitSec);
-        player.score += points;
+        pointsEarned = calculateScore(timeRemainingSec, question.timeLimitSec);
+        player.score += pointsEarned;
       }
     }
     
@@ -104,15 +117,12 @@ export const validateResults = (game: Game) => {
       name: player.name,
       answered: answered,
       correct: correct,
-      points: points,
+      pointsEarned: pointsEarned,
       totalScore: player.score
     });
-
-    player.hasAnswered = false;
-    player.answerTime = undefined;
-    player.answeredCorrectly = undefined;
   });
   
+  updatePlayers(game);
 
   sendMessage(game, {
     type: 'question_result',
@@ -124,9 +134,6 @@ export const validateResults = (game: Game) => {
     id: 0
   });
   
-  // updatePlayers(game);
-  
-  game.playerAnswers.clear();  
   game.currentQuestion++;
   
   if (game.currentQuestion < game.questions.length) {
@@ -147,12 +154,14 @@ export const validateResults = (game: Game) => {
       rank: index + 1
     }));
 
-    sendMessage(game, {
-      type: 'game_finished',
-      data: {
-        scoreboard: scoreboard
-      },
-      id: 0
-    });
+    setTimeout(() => {
+      sendMessage(game, {
+        type: 'game_finished',
+        data: {
+          scoreboard: scoreboard
+        },
+        id: 0
+      });
+    }, 3000);
   }
 } 

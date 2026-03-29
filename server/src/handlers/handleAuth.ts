@@ -1,7 +1,7 @@
 import { WebSocket } from 'ws';
 import { randomUUID } from "node:crypto";
-import { RegData } from "../types";
-import { connections, users } from '../store';
+import { RegData } from "../types.js";
+import { connections, users } from '../store.js';
 
 // allows user to login and proceed
 export const handleAuth = (ws: WebSocket, { name, password }: RegData) => {

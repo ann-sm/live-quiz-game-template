@@ -1,7 +1,7 @@
 import { WebSocket } from 'ws';
 import { randomUUID } from "node:crypto";
-import { CreateGameData, Game, User } from "../types";
-import { games } from '../store';
+import { CreateGameData, Game, User } from "../types.js";
+import { games } from '../store.js';
 
 // validates questions, generates 6-character code, stores game
 export const handleCreateGame = (ws: WebSocket, { questions }: CreateGameData, user: User) => {
@@ -38,7 +38,7 @@ export const handleCreateGame = (ws: WebSocket, { questions }: CreateGameData, u
     playerAnswers: new Map()
   }
 
-  games.set(roomCode, game);
+  games.set(game.id, game);
   
   ws.send(JSON.stringify({
     type: 'game_created',

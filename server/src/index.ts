@@ -1,11 +1,11 @@
 import { WebSocketServer, WebSocket } from 'ws';
-import { WSMessage } from './types';
-import { handleAuth } from './handlers/handleAuth';
-import { handleCreateGame } from './handlers/handleCreate';
-import { handleJoinGame } from './handlers/handleJoin';
-import { connections } from './store';
-import { handleAnswer } from './handlers/handleAnswer';
-import { handleStartGame } from './services/gameService';
+import { WSMessage } from './types.js';
+import { handleAuth } from './handlers/handleAuth.js';
+import { handleCreateGame } from './handlers/handleCreate.js';
+import { handleJoinGame } from './handlers/handleJoin.js';
+import { connections } from './store.js';
+import { handleAnswer } from './handlers/handleAnswer.js';
+import { handleStartGame } from './services/gameService.js';
 
 const PORT = process.env.PORT ? parseInt(process.env.PORT) : 3000;
 

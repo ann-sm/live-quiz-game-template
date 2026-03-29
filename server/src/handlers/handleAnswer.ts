@@ -1,7 +1,7 @@
 import { WebSocket } from 'ws';
-import { AnswerData, User } from "../types";
-import { games } from '../store';
-import { validateResults } from '../services/gameService';
+import { AnswerData, User } from "../types.js";
+import { games } from '../store.js';
+import { validateResults } from '../services/gameService.js';
 
 // validates answer, stores it, sends answer_accepted
 export const handleAnswer = (ws: WebSocket, { gameId, questionIndex, answerIndex }: AnswerData, user: User) => {

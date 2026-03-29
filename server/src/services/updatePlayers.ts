@@ -1,5 +1,5 @@
-import { Game } from "../types";
-import { sendMessage } from "../utils/sendMessage";
+import { Game } from "../types.js";
+import { sendMessage } from "../utils/sendMessage.js";
 
 export const updatePlayers = (game: Game) => {
   const playersList = game.players.map(p => ({
