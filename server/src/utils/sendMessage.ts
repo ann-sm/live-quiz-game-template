@@ -1,6 +1,6 @@
 import { WebSocket } from 'ws';
 import { Game, WSMessage } from '../types';
-import { users } from '../index';
+import { users } from '../store';
 
 export const sendMessage = (game: Game, message: WSMessage) => {
   const messageString = JSON.stringify({ ...message, id: 0 });

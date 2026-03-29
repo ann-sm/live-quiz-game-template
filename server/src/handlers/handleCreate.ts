@@ -1,14 +1,14 @@
 import { WebSocket } from 'ws';
 import { randomUUID } from "node:crypto";
 import { CreateGameData, Game, User } from "../types";
-import { games } from "../index";
+import { games } from '../store';
 
 // validates questions, generates 6-character code, stores game
 export const handleCreateGame = (ws: WebSocket, { questions }: CreateGameData, user: User) => {
   if (!questions || questions.length === 0) {
     ws.send(JSON.stringify({
       type: 'error',
-      data: { errorText: 'No questions added' },
+      data: { message: 'No questions added' },
       id: 0
     }));
     return;
@@ -18,7 +18,7 @@ export const handleCreateGame = (ws: WebSocket, { questions }: CreateGameData, u
     if (question.options.length !== 4 || question.correctIndex < 0 || question.correctIndex > 3) {
       ws.send(JSON.stringify({
         type: 'error',
-        data: { errorText: 'Invalid question data' },
+        data: { message: 'Invalid question data' },
         id: 0
       }));
       return;

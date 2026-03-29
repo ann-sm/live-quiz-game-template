@@ -1,12 +1,11 @@
 import { WebSocketServer, WebSocket } from 'ws';
-import { Game, User, WSMessage } from './types';
-import { handleAuth } from './handlers/auth';
-import { handleCreateGame } from './handlers/createGame';
-import { handleJoinGame } from './handlers/joinGame';
-
-export const users = new Map<string, User>();
-export const games = new Map<string, Game>();
-export const connections = new Map<WebSocket, User>();
+import { WSMessage } from './types';
+import { handleAuth } from './handlers/handleAuth';
+import { handleCreateGame } from './handlers/handleCreate';
+import { handleJoinGame } from './handlers/handleJoin';
+import { connections } from './store';
+import { handleAnswer } from './handlers/handleAnswer';
+import { handleStartGame } from './services/gameService';
 
 const PORT = process.env.PORT ? parseInt(process.env.PORT) : 3000;
 
@@ -36,7 +35,16 @@ wss.on('connection', (ws: WebSocket) => {
             handleJoinGame(ws, data, currentUser);
           }
           break;
-
+        case 'start_game':
+          if (currentUser) {
+            handleStartGame(ws, data, currentUser);
+          }
+          break;
+        case 'answer':
+          if (currentUser) {
+            handleAnswer(ws, data, currentUser);
+          }
+          break;
         default:
           ws.send(JSON.stringify({
             type: 'error',

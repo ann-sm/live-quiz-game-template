@@ -1,8 +1,8 @@
 import { WebSocket } from 'ws';
 import { JoinGameData, Player, User } from "../types";
-import { games } from '../index';
 import { sendMessage } from '../utils/sendMessage';
 import { updatePlayers } from '../services/updatePlayers';
+import { games } from '../store';
 
 // validates code, adds player, broadcasts player_joined and update_players
 export const handleJoinGame = (ws: WebSocket, { code }: JoinGameData, user: User) => {
@@ -11,20 +11,34 @@ export const handleJoinGame = (ws: WebSocket, { code }: JoinGameData, user: User
   if (!game) {
     ws.send(JSON.stringify({
       type: 'error',
-      data: { errorText: 'Game not found' },
+      data: { message: 'Game not found' },
       id: 0
     }));
     return;
   }
-  console.log(game.players.map(p => p.index));
-  console.log(user.index);
 
-  if (game.players.some((player) => player.index === user.index)) {
-    console.log('INGAAAAAME');
-    console.log(user.index);
+  if (game.status !== 'waiting') {
     ws.send(JSON.stringify({
       type: 'error',
-      data: { errorText: 'Player has already joined the game' },
+      data: { message: 'Game has already started' },
+      id: 0
+    }));
+    return;
+  }
+
+  if (game.hostId === user.index) {
+      ws.send(JSON.stringify({
+      type: 'error',
+      data: { message: `Host can't join the game` },
+      id: 0
+    }));
+    return;
+  }
+
+  if (game.players.some((player) => player.index === user.index)) {
+    ws.send(JSON.stringify({
+      type: 'error',
+      data: { message: 'You have already joined the game' },
       id: 0
     }));
     return;
