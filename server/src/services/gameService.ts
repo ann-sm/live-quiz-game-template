@@ -122,8 +122,7 @@ export const validateResults = (game: Game) => {
     });
   });
   
-  updatePlayers(game);
-
+  
   sendMessage(game, {
     type: 'question_result',
     data: {
@@ -133,6 +132,8 @@ export const validateResults = (game: Game) => {
     },
     id: 0
   });
+  
+  updatePlayers(game);
   
   game.currentQuestion++;
   
